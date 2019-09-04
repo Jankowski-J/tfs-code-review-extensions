@@ -231,7 +231,8 @@ class IconSwapper {
 
     addIcon($listItem) {
         let $iconContainer = $listItem.find(this.iconContainer);
-        $(this.iconGenerator.iconTemplate).appendTo($iconContainer);
+        let target = $($iconContainer).find(".type-icon");
+        $(this.iconGenerator.iconTemplate).insertAfter(target);
         let $extIcon = $iconContainer.find(this.extIcon);
         $extIcon.click((evt) => {
             var iconOffset = $extIcon.offset();

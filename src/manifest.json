@@ -1,7 +1,7 @@
 {
 	"name": "Azure DevOps File Review Status",
-	"description": "Track your pull request/commit review progress on a granular, per-file basis.",
-	"version": "0.0.6",
+	"description": "Track your pull request review progress on a granular, per-file basis.",
+	"version": "0.0.7",
 	"manifest_version": 2,
 	"browser_action": {
 		"default_icon": {
@@ -42,8 +42,6 @@
 				"content/scripts.js"
 			],
 			"matches": [
-				"https://*.visualstudio.com/*/pullrequest/*",				
-				"https://*.visualstudio.com/*/commit/*",
 				"https://dev.azure.com/*/pullrequest/*",	
 				"https://dev.azure.com/*/commit/*"
 			],
