@@ -19,6 +19,12 @@ Track your pull request/commit review progress on a granular, per-file basis.
 npm install
 ```
 
+Or, in case of any issues, use:
+
+```bash
+yarn install
+```
+
 ### Build
 
 ```bash

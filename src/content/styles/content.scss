@@ -14,6 +14,7 @@
         cursor: pointer;
         .icon {
             margin-right: 5px;
+            margin-top: 0;
         }
     }
     li:hover {
@@ -22,7 +23,6 @@
     }
 
     height: 150px !important;
-    // left: -1000px !important;
 }
 
 .tfs-cr-ext-icon {

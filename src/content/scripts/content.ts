@@ -238,7 +238,7 @@ class IconSwapper {
             var containerOffset = $('.sidePane-no-full-page-scroll.leftPane').offset();
 
             var calculatedOffset = {
-                top: iconOffset.top - containerOffset.top,
+                top: iconOffset.top - containerOffset.top - 50,
                 left: iconOffset.left - containerOffset.left
             };
 
