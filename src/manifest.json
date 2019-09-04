@@ -1,7 +1,7 @@
 {
-	"name": "TFS File Review Status",
+	"name": "Azure DevOps File Review Status",
 	"description": "Track your pull request/commit review progress on a granular, per-file basis.",
-	"version": "0.0.5",
+	"version": "0.0.6",
 	"manifest_version": 2,
 	"browser_action": {
 		"default_icon": {
@@ -12,7 +12,7 @@
 			"128": "images/icon-128.png",
 			"256": "images/icon-256.png"
 		},
-		"default_title": "TFS File Review Status",
+		"default_title": "DevOps File Review Status",
 		"default_popup": "popup/popup.html"
 	},
 	"icons": {
@@ -42,10 +42,10 @@
 				"content/scripts.js"
 			],
 			"matches": [
-				"http://*/tfs/*/pullrequest/*",
-				"http://*/tfs/*/commit/*",
 				"https://*.visualstudio.com/*/pullrequest/*",				
-				"https://*.visualstudio.com/*/commit/*"
+				"https://*.visualstudio.com/*/commit/*",
+				"https://dev.azure.com/*/pullrequest/*",	
+				"https://dev.azure.com/*/commit/*"
 			],
 			"run_at": "document_end"
 		}

@@ -8,7 +8,7 @@ $(window).on('load', () => {
     log.info('window load');
 
     let iconSwapper = new IconSwapper();
-        iconSwapper.addIcons();
+    iconSwapper.addIcons();
 });
 
 class IconGenerator {
@@ -39,7 +39,7 @@ class IconDropdown {
 
     constructor() {
         this.dropdown = '#tfs-cr-ext-icon-dropdown';
-        this.clickCallback = () => {};       
+        this.clickCallback = () => { };
         this.log = new Logger();
         this.loaded = this.loadDropdownTemplate()
             .then((template) => this.setupDropdown(template));
@@ -47,8 +47,11 @@ class IconDropdown {
 
     setupDropdown(template) {
         this.dropdownTemplate = template;
-        $(this.dropdownTemplate).appendTo('body');
         $('body').click(() => this.$dropdown.hide());
+    }
+
+    fixSetup() {
+        $(this.dropdownTemplate).appendTo('.sidePane-no-full-page-scroll.leftPane');
         this.$dropdown.click((evt) => evt.stopPropagation());
         this.$dropdown.find('li').click((evt) => {
             let $item = $(evt.target).is('li')
@@ -91,12 +94,12 @@ class ItemList {
     log: Logger;
 
     constructor() {
-        this.fileGridContainer = '.files-grid-container';
-        this.fileItem = '.file-item';
+        this.fileGridContainer = '.vc-sparse-files-tree';
+        this.fileItem = '.vc-sparse-files-tree-cell';
         this.folderItem = '.folder-item';
         this.anyListItem = [this.fileItem, this.folderItem].join(',');
         this.itemListDetectionInterval = 250;
-        this.observerCallback = () => {};
+        this.observerCallback = () => { };
         this.log = new Logger();
         this.loaded = this.waitForFileListToBeReady()
             .then(() => this.setupObserve());
@@ -111,15 +114,15 @@ class ItemList {
     }
 
     getLongItemPath($listItem) {
-        return $listItem.attr('title');        
+        return $listItem.find(".vc-tree-cell").attr('aria-label');
     }
 
     setupObserve() {
         let observerConfig = {
-            attributes: false, 
-            childList: true, 
+            attributes: false,
+            childList: true,
             characterData: false,
-            subtree: true 
+            subtree: true
         };
         let observer = new MutationObserver(() => {
             this.log.info('list modified');
@@ -162,9 +165,9 @@ class IconSwapper {
     log: Logger;
 
     constructor() {
-        this.iconContainer = '.grid-icon';
+        this.iconContainer = '.vc-tree-cell';
         this.extIcon = '.tfs-cr-ext-icon';
-        this.changeTitleContainer = '.vc-change-title-link-container, .pullrequest-id-text:visible, .commit-id-short'; // TFS2015, TFS2017 - PR, TFS2017 - commit
+        this.changeTitleContainer = '.bowtie-widget.inline-rename-input.vc-title-text'; // TFS2015, TFS2017 - PR, TFS2017 - commit
         this.itemList = new ItemList();
         this.iconGenerator = new IconGenerator();
         this.iconDropdown = new IconDropdown();
@@ -176,7 +179,10 @@ class IconSwapper {
     }
 
     getChangeTitle() {
-        var name = $(this.changeTitleContainer).text().trim();
+        var segments = window.location.href.split("/");
+        var prId = segments[segments.length - 1].split("?")[0];
+
+        var name = prId;
         this.log.info(`found change name: ${name}`);
         return name;
     }
@@ -186,6 +192,7 @@ class IconSwapper {
         let toSave = {};
         toSave[titleOfChange] = this.iconState;
         this.log.info('state to be saved', toSave);
+
         chrome.storage.local.set(toSave, () => {
             this.log.info('state saved', toSave);
         });
@@ -196,13 +203,14 @@ class IconSwapper {
         let promise = new Promise((resolve, reject) => {
             dependenciesLoaded.then(() => {
                 let titleOfChange = this.getChangeTitle();
-                this.log.info('loading state');
+                this.log.info('loading state:', titleOfChange);
                 chrome.storage.local.get(titleOfChange, (states) => {
                     this.log.info('state loaded', states);
                     if (states[titleOfChange] !== undefined) {
                         this.iconState = states[titleOfChange];
                     }
-                    resolve(states);                
+                    this.iconDropdown.fixSetup();
+                    resolve(states);
                 });
             });
         });
@@ -226,15 +234,23 @@ class IconSwapper {
         $(this.iconGenerator.iconTemplate).appendTo($iconContainer);
         let $extIcon = $iconContainer.find(this.extIcon);
         $extIcon.click((evt) => {
-            this.log.info('clicked icon');        
-            this.iconDropdown.$dropdown.css($extIcon.offset());
+            var iconOffset = $extIcon.offset();
+            var containerOffset = $('.sidePane-no-full-page-scroll.leftPane').offset();
+
+            var calculatedOffset = {
+                top: iconOffset.top - containerOffset.top,
+                left: iconOffset.left - containerOffset.left
+            };
+
+            this.log.info('clicked icon', $extIcon, iconOffset, containerOffset, calculatedOffset);       
+            this.iconDropdown.$dropdown.css(calculatedOffset);
             this.iconDropdown.$dropdown.show();
             this.$lastClickedItem = $listItem;
             evt.stopPropagation();
         });
     }
 
-    addIcons() {        
+    addIcons() {
         this.loaded.then(() => {
             let $listItems = this.itemList.$items;
             this.log.info(`found ${$listItems.length} items to play with`);
@@ -244,12 +260,12 @@ class IconSwapper {
                 }
                 this.addIcon($(listItem));
                 let longItemPath = this.itemList.getLongItemPath($(listItem));
-                let savedItemIconState = this.iconState[longItemPath]; 
+                let savedItemIconState = this.iconState[longItemPath];
                 if (savedItemIconState !== undefined) {
                     this.swapIcon(savedItemIconState, $(listItem));
                 }
             });
         });
-        this.itemList.observe(() => this.addIcons());   
+        this.itemList.observe(() => this.addIcons());
     }
 }
